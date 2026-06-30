@@ -1,12 +1,12 @@
 appName: phpmyadmin
 appImage: phpmyadmin
-appReplicas: 2
+appReplicas: 1
 containerPort: 80
-containerEnvVars: 
+containerEnvVars:
 - name: MYSQL_ROOT_PASSWORD
   valueFrom:
     secretKeyRef:
-      name: java-app-secret
+      name: mysqldb
       key: mysql-root-password
 - name: PMA_HOST
   valueFrom:
@@ -25,4 +25,3 @@ secret:
 
 ingress:
   enabled: false
-
