@@ -38,13 +38,13 @@ Docker Desktop (Windows/Mac) stocke les credentials dans le keystore système pl
 
 `StatefulSet` primary + `StatefulSet` secondary, `PersistentVolumeClaim` par pod, `Service` headless.
 
-Le chart Bitnami est surchargé via `k8sDeployment/mysql-values.yaml`. La `storageClass: linode-block-storage` provisionne les volumes cloud dynamiquement. `volumePermissions.enabled: false` est requis pour éviter un `ImagePullBackOff` sur `bitnami/os-shell` (soumis aux restrictions Docker Hub). L'image `bitnamilegacy/mysql` remplace `bitnami/mysql` (soumise à abonnement payant).
+Le chart Bitnami est surchargé via `mysql/values.yaml`. La `storageClass: linode-block-storage` provisionne les volumes cloud dynamiquement. `volumePermissions.enabled: false` est requis pour éviter un `ImagePullBackOff` sur `bitnami/os-shell` (soumis aux restrictions Docker Hub). L'image `bitnamilegacy/mysql` remplace `bitnami/mysql` (soumise à abonnement payant).
 
 Les `PersistentVolumeClaims` survivent à un `helm uninstall` — si les mots de passe changent entre deux installations, l'ancienne data persiste sur le volume et MySQL refuse les nouvelles credentials. Toujours supprimer les PVCs avant de réinstaller.
 
 ### Étape 4 — Chart Helm écrit de zéro + Helmfile
 
-Un seul chart partagé (`charts/my-chart`) déployé deux fois via Helmfile — une release `java-app`, une release `phpmyadmin` — chacune avec son fichier de valeurs.
+Un seul chart partagé (`charts/app`) déployé deux fois via Helmfile — une release `java-app`, une release `phpmyadmin` — chacune avec son fichier de valeurs.
 
 **`toYaml` pour les env vars** : les env vars utilisent `valueFrom.secretKeyRef` et `valueFrom.configMapKeyRef`, des structures imbriquées qu'une boucle `range` avec `value: {{ .value }}` ne peut pas rendre. `toYaml .Values.containerEnvVars | nindent 8` sérialise la liste telle quelle, quelle que soit la profondeur des champs.
 
@@ -78,13 +78,13 @@ Docker Desktop (Windows/Mac) stores credentials in the system keystore rather th
 
 Primary `StatefulSet` + secondary `StatefulSet`, one `PersistentVolumeClaim` per pod, headless `Service`.
 
-The Bitnami chart is overridden via `k8sDeployment/mysql-values.yaml`. `storageClass: linode-block-storage` dynamically provisions cloud volumes. `volumePermissions.enabled: false` is required to avoid `ImagePullBackOff` on `bitnami/os-shell` (subject to Docker Hub rate limits). The `bitnamilegacy/mysql` image replaces `bitnami/mysql` (which requires a paid subscription).
+The Bitnami chart is overridden via `mysql/values.yaml`. `storageClass: linode-block-storage` dynamically provisions cloud volumes. `volumePermissions.enabled: false` is required to avoid `ImagePullBackOff` on `bitnami/os-shell` (subject to Docker Hub rate limits). The `bitnamilegacy/mysql` image replaces `bitnami/mysql` (which requires a paid subscription).
 
 `PersistentVolumeClaims` survive a `helm uninstall` — if passwords change between installs, the old data persists on the volume and MySQL rejects the new credentials. Always delete PVCs before reinstalling.
 
 ### Step 4 — Helm chart from scratch + Helmfile
 
-A single shared chart (`charts/my-chart`) deployed twice via Helmfile — one `java-app` release, one `phpmyadmin` release — each with its own values file.
+A single shared chart (`charts/app`) deployed twice via Helmfile — one `java-app` release, one `phpmyadmin` release — each with its own values file.
 
 **`toYaml` for env vars**: env vars use `valueFrom.secretKeyRef` and `valueFrom.configMapKeyRef`, nested structures that a `range` loop with `value: {{ .value }}` cannot render. `toYaml .Values.containerEnvVars | nindent 8` serializes the list as-is, regardless of field depth.
 
